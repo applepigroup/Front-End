@@ -1,40 +1,33 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- * @lint-ignore-every XPLATJSCOPYRIGHT1
- */
-
-import {createStackNavigator,DrawerNavigator,createAppContainer} from 'react-navigation';
-import { Signup } from './signup';
-import {QRScanner} from './qrScanner';
-import {Signup_next} from './signup_next'
-import {main} from './main'
-import {Selector} from './selector'
 
 
-const stack =
-{
-    home:{
-        screen:main,
-    },
-    register:
-    {
-        screen:Signup,
-    },
-    qrscanner:{
-        screen:QRScanner,
-    },
-    signupnext:{
-        screen:Signup_next,
-    },
-    selector:
-    {
-        screen:Selector,
-    }
+import React,{Component} from 'react';
+import { StyleSheet, Text, View,ImageBackground} from 'react-native';
+import login from './src/pages/login';
+
+export default class App extends Component {
+  render() {
+    return (
+      <ImageBackground source={require('./app/img/sch.jpg')}
+                     style={styles.container}>
+        <View style ={styles.inner}></View>
+          <Text style={{colour='#442ce',fontSize=20}}>'welcome'</Text>
+      </ImageBackground>
+
+      
+    );
+  }
 }
 
-const AppNavigator = createStackNavigator(stack ,{initialRouteName:'home'});
-export default createAppContainer(AppNavigator);
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+ },
+  inner:{
+     width:'80%',
+     height:'80%',
+     backgroundColor:'rgba(255,255,255,.7)'
+  }
+});
+ 
