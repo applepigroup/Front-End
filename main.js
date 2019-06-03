@@ -1,9 +1,8 @@
 
 import React, {Component} from 'react';
-import {StyleSheet, Text, View,TextInput,TouchableWithoutFeedback,Keyboard,AsyncStorage,NetInfo} from 'react-native';
+import {StyleSheet, Text, View,TextInput,TouchableWithoutFeedback,Keyboard,AsyncStorage,NetInfo,ImageBackground} from 'react-native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-//import Entypo from 'react-native-vector-icons/Entypo';
 import {Notification} from './notification';
 
 export class main extends Component
@@ -15,7 +14,8 @@ export class main extends Component
     }
     async saveCredentials (item,value)
     {
-      try{
+      try
+      {
         await AsyncStorage.setItem(item,value);
       }
       catch(error)
@@ -31,41 +31,40 @@ export class main extends Component
         Keyboard.dismiss();
         if(this.state.isConnected)
         {
-          fetch('http://172.20.10.4:3000/login',{method:'POST',body:JSON.stringify({refid:this.state.referenceid,indexnum:this.state.indexnumber}),headers:{'Content-Type': 'application/json'}}).
-          then(res => res.json())
+          fetch('http://192.168.42.162:4000/login',{method:'POST',body:JSON.stringify({refid:this.state.referenceid,indexnum:this.state.indexnumber}),headers:{'Content-Type': 'application/json'}})
+          .then(res => res.json())
           .then(resp=>
           {
             if(resp.success)
             {
-            this.saveCredentials('token_id',resp.token);
-            this.saveCredentials('referenceid',refid);
-            this.saveCredentials('indexnumber',indexnum);
-            this.props.navigation.replace('selector');
-            this.setState({referenceid:'',lectureid:''});
+              this.saveCredentials('token_id',resp.token);
+              this.saveCredentials('referenceid',refid);
+              this.saveCredentials('indexnumber',indexnum);
+              this.props.navigation.replace('qrscanner');
             }
             else
             {
-              alert("Wrong credentials");
+              alert(resp.message);
             }
 
           })
-          .catch(()=>{
-            this.setState({message:'Please Check your internet connection'})
-            this.setState({referenceid:'',lectureid:''});
-          })
+          .catch((error)=>
+          {
+            alert(error)
+          });
       }
 
     }
     componentWillMount()
     {
       NetInfo.isConnected.addEventListener('connectionChange',this.handleConnectivityChange);
-      let url = 'http://172.20.10.4:3000/verifytoken';
+      let url = 'http://192.168.42.162:4000/verifytoken';
       if(this.state.isConnected)
       {
         AsyncStorage.getItem('token_id').then(value=>{
           fetch(url,{method:'GET',headers:{Authorization:`bearer ${value}`}})
           .then(()=>{
-            this.props.navigation.replace('selector');
+           this.props.navigation.replace('qrscanner');
           })
           .catch((error)=>{ alert(error) });
           }).catch(()=>{this.setState({message:error})});
@@ -79,58 +78,88 @@ export class main extends Component
     {
       console.log(isConnected);
       if(isConnected)
-        this.setState({isConnected:isConnected})
+          this.setState({isConnected:isConnected});
       else
-      {
-        this.setState({isConnected:isConnected})
-      }
+          this.setState({isConnected:isConnected});
     }
     render()
     {
       if(!this.state.isConnected)
       {
       return (
+        <ImageBackground source={require('./wallpaper.png')}
+                       style={styles.container}>
         <View style={styles.container}>
                 <Notification msg="No internet connection" />
                 <FontAwesome style = {styles.iconuser} name = "user-o" />
-                <TextInput style={styles.textin} defaultValue = {this.state.referenceid}  placeholder='Reference id' keyboardType={"numeric"}  onChangeText = {(newtext)=>{this.setState({referenceid:newtext})}} placeholderTextColor = "#002f6c" />
+                <TextInput style={styles.textin} defaultValue = {this.state.referenceid}
+                placeholder='Reference id' keyboardType={"numeric"}
+                 onChangeText = {(newtext)=>{this.setState({referenceid:newtext})}}
+                  placeholderTextColor = 'white'
+                    underlineColorAndroid="#560027" />
+
                 <FontAwesome style = {styles.iconlock} name = "lock" />
-                <TextInput style={styles.textin} placeholder= 'Lectureid'  defaultValue = {this.state.lectureid} onChangeText = {(newpass)=>{this.setState({lectureid:newpass})}} placeholderTextColor = "#002f6c"/>
+                <TextInput style={styles.textin} placeholder= 'Index Number'
+                 defaultValue = {this.state.indexnumber}
+                  onChangeText = {(newtext)=>{this.setState({indexnumber:newtext})}}
+                   placeholderTextColor = 'white'
+                     underlineColorAndroid = "#560027" />
+
                <TouchableWithoutFeedback onPress={this.handleSubmit}>
                   <View style={styles.loginbutton}>
-                      <Text style = {styles.loginbuttontext}>LOGIN</Text>
+                      <Text style = {styles.loginbuttontext}>Login</Text>
                   </View>
-              </TouchableWithoutFeedback>
+                </TouchableWithoutFeedback>
+
+              <View style={styles.signupview}>
+              <Text style={styles.signuptext, {color: "black", fontSize: 18, textAlign:'center'}}>Do you have an account?</Text>
               <TouchableWithoutFeedback onPress={()=>{this.props.navigation.navigate('register')}}>
-                  <View style={styles.signupview}>
-                      <Text style = {styles.signuptext}>Don't have an account?</Text>
-                  </View>
-              </TouchableWithoutFeedback>
+                    <Text style = {styles.signuptext}>Signup</Text>
+                    </TouchableWithoutFeedback>
+                </View>
+
           </View>
+          </ImageBackground>
         )
       }
       else
       {
         return(
+          <ImageBackground source={require('./wallpaper.png')}
+                         style={styles.container}>
           <View style={styles.container}>
                 <FontAwesome style = {styles.iconuser} name = "user-o" />
-                <TextInput style={styles.textin} defaultValue = {this.state.referenceid}  placeholder='Reference id' keyboardType={"numeric"}  onChangeText = {(newtext)=>{this.setState({referenceid:newtext})}} placeholderTextColor = "#002f6c"/>
+                <TextInput style={styles.textin} defaultValue = {this.state.referenceid}
+                 placeholder='Reference id' keyboardType={"numeric"}
+                  onChangeText = {(newtext)=>{this.setState({referenceid:newtext})}}
+                  placeholderTextColor = 'white'
+                    underlineColorAndroid ="#560027" />
+
                 <FontAwesome style = {styles.iconlock} name = "lock" />
-                <TextInput style={styles.textin} placeholder= 'Lectureid'  defaultValue = {this.state.lectureid} onChangeText = {(newpass)=>{this.setState({lectureid:newpass})}} placeholderTextColor = "#002f6c"/>
-               <TouchableWithoutFeedback onPress={this.handleSubmit}>
+                <TextInput style={styles.textin} placeholder= 'Index number'
+                 defaultValue = {this.state.indexnumber}
+                 onChangeText = {(newtext)=>{this.setState({indexnumber:newtext})}}
+                 placeholderTextColor = 'white'
+                   underlineColorAndroid="#560027" />
+
+                <TouchableWithoutFeedback onPress={this.handleSubmit}>
                   <View style={styles.loginbutton}>
-                      <Text style = {styles.loginbuttontext}>LOGIN</Text>
+                      <Text style = {styles.loginbuttontext}>Login</Text>
                   </View>
-              </TouchableWithoutFeedback>
-              <TouchableWithoutFeedback onPress={()=>{this.props.navigation.navigate('register')}}>
-                  <View style={styles.signupview}>
-                      <Text style = {styles.signuptext}>Don't have a student account?</Text>
+                </TouchableWithoutFeedback>
+
+                <View style={styles.signupview}>
+                <Text style={styles.signuptext, {color:"black", fontSize:18, textAlign:'center'}}>Do you have an account?</Text>
+                <TouchableWithoutFeedback onPress={()=>{this.props.navigation.navigate('register')}}>
+                      <Text style = {styles.signuptext}>Signup</Text>
+                      </TouchableWithoutFeedback>
                   </View>
-              </TouchableWithoutFeedback>
+
           </View>
+         </ImageBackground>
         )
       }
-     }
+    }
   }
   const styles = StyleSheet.create({
     container:
@@ -139,36 +168,36 @@ export class main extends Component
       flexDirection:'column',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: "#632A5D",
+    //  backgroundColor: '#00539C',
     },
     textin:
     {
       width:wp('80%'),
       position:'relative',
       top:hp('1%'),
-      borderRadius:hp('1.5%'),
+      //borderRadius:hp('2.0%'),
       textAlign:'center',
-      borderColor:'#034F84',
-      borderWidth:hp('0.3%'),
-      borderStyle :'solid',
-      fontSize:18,
+    //  borderColor:'#90a4ae',
+      //borderWidth:hp('0.3%'),
+    //  borderStyle :'solid',
+      fontSize:hp('3.0%'),
       textDecorationLine:'none',
       //marginTop:hp('7%'),
       color:'white',
-      backgroundColor:'black'
+    //  backgroundColor:'transparent',
     },
 
     loginbutton:
     {
-      width:wp('80%'),
+      width:wp('70%'),
       borderStyle:'solid',
       borderColor:'#004B8D',
       borderWidth:1,
-      padding:hp('2%'),
+      padding:hp('1%'),
       position:'relative',
       top:hp('10%'),
-      backgroundColor:'dodgerblue',
-      borderRadius:hp('1%'),
+      backgroundColor:'#3949ab',
+      borderRadius:hp('4%'),
     },
     loginbuttontext:
     {
@@ -180,22 +209,23 @@ export class main extends Component
     },
     signupview:
     {
+      flexDirection: 'column',
+      justifyContent: 'center',
       width:wp('85%'),
       padding:hp('3.45%'),
       marginTop:hp('5%'),
-      borderColor:'#034F84',
-
-      borderWidth:2,
-      borderStyle:'solid',
+      //borderColor:'#034F84',
+      //borderWidth:2,
+      //borderStyle:'solid',
       position:'relative',
-      backgroundColor:'black',
+      //backgroundColor:'#034F84',
       top:hp('12.5%')
 
     },
     signuptext:
     {
       color:'white',
-      fontSize: hp('2.4%'),
+      fontSize: 18,
       textAlign:'center',
     },
     iconuser:
